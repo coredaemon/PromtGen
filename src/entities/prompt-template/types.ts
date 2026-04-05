@@ -50,6 +50,8 @@ export type PresetDefinition = {
   title: string
   description: string
   category: string
+  /** Подгруппа внутри категории (например «Редактирование фото» в «Изображения»). */
+  group?: string
   fields: PromptFields
 }
 

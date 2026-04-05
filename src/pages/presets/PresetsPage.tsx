@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react'
 import { BUILTIN_PRESETS } from '@/data/presets/presets'
-import { PRESET_CATEGORIES } from '@/data/presets/categories'
+import {
+  PRESET_CATEGORIES,
+  sortPresetGroupKeys,
+} from '@/data/presets/categories'
+import type { PresetDefinition } from '@/entities/prompt-template/types'
 import { PresetGrid } from '@/features/template-catalog/PresetGrid'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { SearchInput } from '@/shared/ui/SearchInput'
 import { CategoryFilter } from '@/shared/ui/CategoryFilter'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { SectionTitle } from '@/shared/ui/SectionTitle'
 import {
   getFavoritePresetIds,
   setFavoritePresetIds,
@@ -24,10 +29,37 @@ export function PresetsPage() {
       return (
         p.title.toLowerCase().includes(q) ||
         p.description.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
+        p.category.toLowerCase().includes(q) ||
+        (p.group?.toLowerCase().includes(q) ?? false)
       )
     })
   }, [query, category])
+
+  const presetSections = useMemo(() => {
+    const ungrouped: PresetDefinition[] = []
+    const byGroup = new Map<string, PresetDefinition[]>()
+    for (const p of filtered) {
+      if (p.group) {
+        const list = byGroup.get(p.group) ?? []
+        list.push(p)
+        byGroup.set(p.group, list)
+      } else {
+        ungrouped.push(p)
+      }
+    }
+    const sections: { title: string | null; presets: PresetDefinition[] }[] =
+      []
+    if (ungrouped.length > 0) {
+      sections.push({ title: null, presets: ungrouped })
+    }
+    for (const key of sortPresetGroupKeys([...byGroup.keys()])) {
+      const list = byGroup.get(key)
+      if (list?.length) {
+        sections.push({ title: key, presets: list })
+      }
+    }
+    return sections
+  }, [filtered])
 
   return (
     <div>
@@ -54,17 +86,26 @@ export function PresetsPage() {
           description="Попробуйте другой запрос или сбросьте категорию."
         />
       ) : (
-        <PresetGrid
-          presets={filtered}
-          isFavorite={(id) => favIds.has(id)}
-          onFavoriteToggle={(id) => {
-            const next = new Set(favIds)
-            if (next.has(id)) next.delete(id)
-            else next.add(id)
-            setFavIds(next)
-            setFavoritePresetIds([...next])
-          }}
-        />
+        <div className="flex flex-col gap-10">
+          {presetSections.map((sec, idx) => (
+            <div key={sec.title ?? `ungrouped-${idx}`}>
+              {sec.title ? (
+                <SectionTitle className="mb-4">{sec.title}</SectionTitle>
+              ) : null}
+              <PresetGrid
+                presets={sec.presets}
+                isFavorite={(id) => favIds.has(id)}
+                onFavoriteToggle={(id) => {
+                  const next = new Set(favIds)
+                  if (next.has(id)) next.delete(id)
+                  else next.add(id)
+                  setFavIds(next)
+                  setFavoritePresetIds([...next])
+                }}
+              />
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )

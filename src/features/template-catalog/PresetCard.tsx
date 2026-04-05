@@ -22,6 +22,11 @@ export function PresetCard({
       <div className="mb-2 text-[12px] font-semibold uppercase leading-4 tracking-[0.02em] text-[var(--text-3)]">
         {preset.category}
       </div>
+      {preset.group ? (
+        <div className="-mt-1 mb-2 text-[12px] font-medium leading-4 text-[var(--text-3)]">
+          {preset.group}
+        </div>
+      ) : null}
       <h3 className="text-[17px] font-semibold leading-6 tracking-tight text-[var(--text-1)] transition-colors duration-[140ms] group-hover:text-[var(--accent)] md:text-[22px] md:leading-[30px]">
         {preset.title}
       </h3>
