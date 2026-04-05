@@ -4,6 +4,9 @@ export const PRESET_CATEGORIES = [
   'Обучение',
   'Идеи и творчество',
   'Повседневные задачи',
+  'Путешествия',
+  'Здоровье',
+  'Деньги и финансы',
 ] as const
 
 export type PresetCategory = (typeof PRESET_CATEGORIES)[number]
