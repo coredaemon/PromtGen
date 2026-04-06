@@ -5,12 +5,14 @@ type PresetGridProps = {
   presets: PresetDefinition[]
   isFavorite: (id: string) => boolean
   onFavoriteToggle: (id: string) => void
+  highlightTokens?: string[]
 }
 
 export function PresetGrid({
   presets,
   isFavorite,
   onFavoriteToggle,
+  highlightTokens,
 }: PresetGridProps) {
   if (presets.length === 0) {
     return null
@@ -23,6 +25,7 @@ export function PresetGrid({
           preset={p}
           favorite={isFavorite(p.id)}
           onFavoriteToggle={() => onFavoriteToggle(p.id)}
+          highlightTokens={highlightTokens}
         />
       ))}
     </div>

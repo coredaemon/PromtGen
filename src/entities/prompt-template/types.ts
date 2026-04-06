@@ -53,6 +53,20 @@ export type PresetDefinition = {
   /** Подгруппа внутри категории (опционально, для группировки в каталоге). */
   group?: string
   fields: PromptFields
+  /** Скрытые ключевые слова и синонимы для поиска. */
+  searchTerms?: string[]
+  /** Бытовые формулировки и «как люди ищут». */
+  phrases?: string[]
+  /** Жизненные сценарии (поиск вместе с phrases). */
+  useCases?: string[]
+  /** Теги: поиск (и при желании отображение в UI). */
+  tags?: string[]
+  /** Смысловая группа для кластеризации и «похожих». */
+  searchGroup?: string
+  /** Сдвиг при равном скоринге (больше — выше). */
+  priority?: number
+  /** Явные соседи в блоке «похожие заготовки». */
+  relatedPresetIds?: string[]
 }
 
 export type HistoryEntry = {

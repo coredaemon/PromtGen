@@ -16,11 +16,14 @@ export function CategoryFilter({
   const active = `${chipBase} border-transparent bg-[var(--accent-soft)] text-[var(--accent)]`
 
   return (
-    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:py-0">
+    <nav
+      className="-mx-1 flex flex-nowrap gap-1.5 overflow-x-auto px-1 py-0.5 md:mx-0 md:px-0"
+      aria-label="Категории заготовок"
+    >
       <button
         type="button"
         onClick={() => onChange('all')}
-        className={value === 'all' ? active : inactive}
+        className={`whitespace-nowrap ${value === 'all' ? active : inactive}`}
       >
         Все
       </button>
@@ -29,11 +32,11 @@ export function CategoryFilter({
           key={c}
           type="button"
           onClick={() => onChange(c)}
-          className={value === c ? active : inactive}
+          className={`whitespace-nowrap ${value === c ? active : inactive}`}
         >
           {c}
         </button>
       ))}
-    </div>
+    </nav>
   )
 }

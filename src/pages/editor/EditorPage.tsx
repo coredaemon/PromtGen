@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { BUILTIN_PRESETS, getPresetById } from '@/data/presets/presets'
 import { PRESET_CATEGORIES } from '@/data/presets/categories'
-import { getPresetById } from '@/data/presets/presets'
+import { getRelatedPresets } from '@/shared/lib/presetSearch'
 import { createNewTemplate, templateFromPreset } from '@/entities/prompt-template/factory'
 import { emptyPromptFields } from '@/entities/prompt-template/types'
 import type { PromptTemplate } from '@/entities/prompt-template/types'
@@ -119,6 +121,12 @@ export function EditorPage() {
     () => (template ? buildPrompt(template.fields) : ''),
     [template],
   )
+
+  const relatedPresets = useMemo(() => {
+    const pid = template?.sourcePresetId
+    if (!pid) return []
+    return getRelatedPresets(pid, BUILTIN_PRESETS, 4)
+  }, [template?.sourcePresetId])
 
   const onCopy = useCallback(async () => {
     if (!template) return
@@ -292,6 +300,40 @@ export function EditorPage() {
           />
         </div>
       </div>
+
+      {relatedPresets.length > 0 ? (
+        <section className="mb-8 rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-1)] p-5 shadow-[var(--shadow-sm)] md:p-6">
+          <h2 className="mb-4 text-[15px] font-semibold leading-5 text-[var(--text-1)]">
+            Похожие заготовки
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {relatedPresets.map((p) => (
+              <li key={p.id}>
+                <Link
+                  to={`/editor?preset=${encodeURIComponent(p.id)}`}
+                  className="group flex items-start justify-between gap-3 rounded-[12px] border border-transparent px-1 py-1 transition-[border-color,background-color] hover:border-[var(--border-soft)] hover:bg-[var(--surface-2)]"
+                >
+                  <div>
+                    <div className="text-[12px] font-semibold uppercase leading-4 tracking-[0.02em] text-[var(--text-3)]">
+                      {p.category}
+                    </div>
+                    <div className="mt-1 text-[16px] font-semibold leading-6 text-[var(--text-1)] group-hover:text-[var(--accent)]">
+                      {p.title}
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[14px] leading-5 text-[var(--text-2)]">
+                      {p.description}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    className="mt-1 h-5 w-5 shrink-0 text-[var(--text-3)] group-hover:text-[var(--accent)]"
+                    aria-hidden
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <PromptWorkspace
         advanced={advanced}

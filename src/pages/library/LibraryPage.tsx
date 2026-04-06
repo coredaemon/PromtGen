@@ -20,6 +20,7 @@ import {
 } from '@/shared/storage/idb'
 import { copyToClipboard } from '@/shared/lib/clipboard'
 import { buildPrompt } from '@/shared/lib/buildPrompt'
+import { normalizeText, tokenizeQuery } from '@/shared/lib/presetSearch'
 import { getFavoritePresetIds } from '@/shared/storage/localPreferences'
 
 type Tab = 'my' | 'favorites' | 'history'
@@ -52,18 +53,18 @@ export function LibraryPage() {
   }, [])
 
   const filteredTemplates = useMemo(() => {
-    const q = query.trim().toLowerCase()
     let list = templates
     if (tab === 'favorites') {
       list = list.filter((t) => t.isFavorite)
     }
-    if (!q) return list
-    return list.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q),
-    )
+    const tokens = tokenizeQuery(query)
+    if (tokens.length === 0) return list
+    return list.filter((t) => {
+      const blob = normalizeText(
+        [t.title, t.description, t.category, ...t.tags].join(' '),
+      )
+      return tokens.every((tok) => blob.includes(tok))
+    })
   }, [templates, tab, query])
 
   const favoritePresetIds = new Set(getFavoritePresetIds())
@@ -72,13 +73,12 @@ export function LibraryPage() {
   )
 
   const filteredHistory = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return history
-    return history.filter(
-      (h) =>
-        h.title.toLowerCase().includes(q) ||
-        h.result.toLowerCase().includes(q),
-    )
+    const tokens = tokenizeQuery(query)
+    if (tokens.length === 0) return history
+    return history.filter((h) => {
+      const blob = normalizeText(`${h.title} ${h.result}`)
+      return tokens.every((tok) => blob.includes(tok))
+    })
   }, [history, query])
 
   const tabBar = (

@@ -3,17 +3,21 @@ import { Link } from 'react-router-dom'
 import type { PresetDefinition } from '@/entities/prompt-template/types'
 import { FavoriteToggle } from '@/features/favorites/FavoriteToggle'
 import { buttonVisualClass } from '@/shared/ui/buttonStyles'
+import { HighlightText } from '@/shared/ui/highlightText'
 
 type PresetCardProps = {
   preset: PresetDefinition
   favorite: boolean
   onFavoriteToggle: () => void
+  /** Токены для подсветки (нормализованные). */
+  highlightTokens?: string[]
 }
 
 export function PresetCard({
   preset,
   favorite,
   onFavoriteToggle,
+  highlightTokens = [],
 }: PresetCardProps) {
   return (
     <article
@@ -28,10 +32,18 @@ export function PresetCard({
         </div>
       ) : null}
       <h3 className="text-[17px] font-semibold leading-6 tracking-tight text-[var(--text-1)] transition-colors duration-[140ms] group-hover:text-[var(--accent)] md:text-[22px] md:leading-[30px]">
-        {preset.title}
+        {highlightTokens.length > 0 ? (
+          <HighlightText text={preset.title} tokens={highlightTokens} />
+        ) : (
+          preset.title
+        )}
       </h3>
       <p className="mt-2 flex-1 text-[15px] font-normal leading-6 text-[var(--text-2)]">
-        {preset.description}
+        {highlightTokens.length > 0 ? (
+          <HighlightText text={preset.description} tokens={highlightTokens} />
+        ) : (
+          preset.description
+        )}
       </p>
       <div className="mt-[18px] flex flex-col gap-2.5 border-t border-[var(--border-soft)] pt-4 md:flex-row md:flex-wrap md:items-center md:gap-2">
         <Link
